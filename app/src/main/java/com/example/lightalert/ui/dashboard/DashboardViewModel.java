@@ -1,23 +1,35 @@
 package com.example.lightalert.ui.dashboard;
 
+import android.app.Application;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class DashboardViewModel extends ViewModel {
+import com.example.lightalert.util.FileUtil;
 
-    private final MutableLiveData<String> mText;
+import org.json.JSONObject;
 
-    public DashboardViewModel() {
-        mText = new MutableLiveData<>();
-        //mText.setValue("This is dashboard fragment");
+public class DashboardViewModel extends AndroidViewModel {
+
+    private final MutableLiveData<JSONObject> mSchedule;
+
+    public DashboardViewModel(@NonNull Application application) {
+        super(application);
+        mSchedule = new MutableLiveData<>();
+        loadSchedule(application);
     }
 
-    public void setText(String text) {
-        mText.setValue(text);
+    public LiveData<JSONObject> getSchedule() {
+        return mSchedule;
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    private void loadSchedule(Application application) {
+        try {
+            JSONObject json = FileUtil.loadJSONFromAsset(application, "schedule.json");
+            mSchedule.setValue(json);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

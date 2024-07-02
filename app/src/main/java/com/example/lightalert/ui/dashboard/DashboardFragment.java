@@ -4,52 +4,57 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.lightalert.databinding.FragmentDashboardBinding;
-import com.example.lightalert.util.FileUtil;
+import com.example.lightalert.R;
+import com.example.lightalert.ui.adapters.SchedulePagerAdapter;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class DashboardFragment extends Fragment {
 
-    private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
+    private ViewPager2 viewPager;
+    private SchedulePagerAdapter schedulePagerAdapter;
+    private TabLayout tabLayout;
 
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        tabLayout = root.findViewById(R.id.tabLayout);
+        viewPager = root.findViewById(R.id.viewPager);
 
-        final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
-        // Read and display JSON data
-        try {
-            JSONObject scheduleJson = FileUtil.loadJSONFromAsset(requireContext(), "schedule.json");
-            if (scheduleJson != null) {
-                String formattedJson = scheduleJson.toString(4); // 4 is the number of spaces for indentation
-                dashboardViewModel.setText(formattedJson);
+        dashboardViewModel.getSchedule().observe(getViewLifecycleOwner(), scheduleJson -> {
+            try {
+                JSONObject scheduleData = scheduleJson.getJSONObject("schedule");
+                List<String> daysOfWeek = new ArrayList<>();
+                Iterator<String> keys = scheduleData.keys();
+                while (keys.hasNext()) {
+                    daysOfWeek.add(keys.next());
+                }
+                schedulePagerAdapter = new SchedulePagerAdapter(requireActivity(), scheduleData, daysOfWeek);
+                viewPager.setAdapter(schedulePagerAdapter);
+                new TabLayoutMediator(tabLayout, viewPager,
+                        (tab, position) -> tab.setText(daysOfWeek.get(position))
+                ).attach();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
+        });
 
         return root;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
     }
 }
