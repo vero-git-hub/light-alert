@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.lightalert.R;
 import com.example.lightalert.ui.adapters.SchedulePagerAdapter;
+import com.example.lightalert.util.DateUtil;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -27,6 +29,7 @@ public class DashboardFragment extends Fragment {
     private ViewPager2 viewPager;
     private SchedulePagerAdapter schedulePagerAdapter;
     private TabLayout tabLayout;
+    private TextView weekRangeTextView;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -36,6 +39,10 @@ public class DashboardFragment extends Fragment {
 
         tabLayout = root.findViewById(R.id.tabLayout);
         viewPager = root.findViewById(R.id.viewPager);
+        weekRangeTextView = root.findViewById(R.id.weekRangeTextView);
+
+        String weekRange = DateUtil.getCurrentWeekRange();
+        weekRangeTextView.setText(weekRange);
 
         dashboardViewModel.getSchedule().observe(getViewLifecycleOwner(), scheduleJson -> {
             try {
@@ -45,6 +52,7 @@ public class DashboardFragment extends Fragment {
                 while (keys.hasNext()) {
                     daysOfWeek.add(keys.next());
                 }
+
                 schedulePagerAdapter = new SchedulePagerAdapter(requireActivity(), scheduleData, daysOfWeek);
                 viewPager.setAdapter(schedulePagerAdapter);
                 new TabLayoutMediator(tabLayout, viewPager,
