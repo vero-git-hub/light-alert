@@ -20,6 +20,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,6 +45,8 @@ public class DashboardFragment extends Fragment {
         String weekRange = DateUtil.getCurrentWeekRange();
         weekRangeTextView.setText(weekRange);
 
+        int currentDayIndex = DateUtil.getDayOfWeek();
+
         dashboardViewModel.getSchedule().observe(getViewLifecycleOwner(), scheduleJson -> {
             try {
                 JSONObject scheduleData = scheduleJson.getJSONObject("schedule");
@@ -55,6 +58,9 @@ public class DashboardFragment extends Fragment {
 
                 schedulePagerAdapter = new SchedulePagerAdapter(requireActivity(), scheduleData, daysOfWeek);
                 viewPager.setAdapter(schedulePagerAdapter);
+
+                setDayOfWeek(currentDayIndex);
+
                 new TabLayoutMediator(tabLayout, viewPager,
                         (tab, position) -> tab.setText(daysOfWeek.get(position))
                 ).attach();
@@ -64,5 +70,16 @@ public class DashboardFragment extends Fragment {
         });
 
         return root;
+    }
+
+    /**
+     * Setting the current day of the week in TabLayout and ViewPager:
+     * - setting the current page in ViewPager;
+     * - scroll to current tab in TabLayout.
+     * @param currentDayIndex
+     */
+    private void setDayOfWeek(int currentDayIndex) {
+        viewPager.setCurrentItem(currentDayIndex, false);
+        tabLayout.setScrollPosition(currentDayIndex, 0f, true);
     }
 }

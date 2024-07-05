@@ -18,4 +18,10 @@ public class DateUtil {
 
         return startDate + " - " + endDate;
     }
+
+    public static int getDayOfWeek() {
+        Calendar calendar = Calendar.getInstance();
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        return dayOfWeek - 2;
+    }
 }
