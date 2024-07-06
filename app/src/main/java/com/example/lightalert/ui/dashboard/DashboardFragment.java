@@ -31,6 +31,8 @@ public class DashboardFragment extends Fragment {
     private SchedulePagerAdapter schedulePagerAdapter;
     private TabLayout tabLayout;
     private TextView weekRangeTextView;
+    private TextView clockTextView;
+    private TextView notesTextView;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -41,6 +43,8 @@ public class DashboardFragment extends Fragment {
         tabLayout = root.findViewById(R.id.tabLayout);
         viewPager = root.findViewById(R.id.viewPager);
         weekRangeTextView = root.findViewById(R.id.weekRangeTextView);
+        clockTextView = root.findViewById(R.id.clockTextView);
+        notesTextView = root.findViewById(R.id.notesTextView);
 
         String weekRange = DateUtil.getCurrentWeekRange();
         weekRangeTextView.setText(weekRange);
@@ -64,12 +68,34 @@ public class DashboardFragment extends Fragment {
                 new TabLayoutMediator(tabLayout, viewPager,
                         (tab, position) -> tab.setText(daysOfWeek.get(position))
                 ).attach();
+
+                updateCurrentDaySchedule(scheduleData, daysOfWeek.get(currentDayIndex));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
         return root;
+    }
+
+    private void updateCurrentDaySchedule(JSONObject scheduleData, String currentDay) {
+        try {
+            JSONObject currentDaySchedule = scheduleData.getJSONObject(currentDay);
+            StringBuilder clockBuilder = new StringBuilder();
+            StringBuilder notesBuilder = new StringBuilder();
+
+            Iterator<String> keys = currentDaySchedule.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                clockBuilder.append(key).append("\n");
+                notesBuilder.append(currentDaySchedule.getString(key)).append("\n");
+            }
+
+            clockTextView.setText(clockBuilder.toString().trim());
+            notesTextView.setText(notesBuilder.toString().trim());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
