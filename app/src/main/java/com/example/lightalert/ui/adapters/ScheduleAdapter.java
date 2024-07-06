@@ -2,7 +2,6 @@ package com.example.lightalert.ui.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lightalert.R;
+import com.example.lightalert.util.DateUtil;
 import com.example.lightalert.util.StatusColorUtil;
 
 import org.json.JSONException;
@@ -42,7 +42,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             try {
                 this.times[index] = key;
                 this.statuses[index] = schedule.getString(key);
-                Log.d("ScheduleAdapter", "Read time: " + key + ", status: " + schedule.getString(key));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -85,9 +84,16 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             itemHolder.timeTextView.setText(times[position]);
             itemHolder.statusTextView.setText(statuses[position]);
-            Log.d("ScheduleAdapter", "Binding view for time: " + times[position] + ", status: " + statuses[position]);
 
             itemHolder.statusTextView.setBackgroundColor(StatusColorUtil.getStatusColor(context, statuses[position]));
+
+            if (DateUtil.isCurrentTime(times[position])) {
+                itemHolder.timeTextView.setTextColor(ContextCompat.getColor(context, R.color.highlight));
+                itemHolder.statusTextView.setTextColor(ContextCompat.getColor(context, R.color.highlight));
+            } else {
+                itemHolder.timeTextView.setTextColor(Color.BLACK);
+                itemHolder.statusTextView.setTextColor(Color.BLACK);
+            }
         }
     }
 

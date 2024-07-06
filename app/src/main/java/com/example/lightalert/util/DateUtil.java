@@ -1,8 +1,11 @@
 package com.example.lightalert.util;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DateUtil {
 
@@ -23,5 +26,25 @@ public class DateUtil {
         Calendar calendar = Calendar.getInstance();
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         return dayOfWeek - 2;
+    }
+
+    public static boolean isCurrentTime(String timeRange) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("Europe/Kiev"));
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+
+        String[] parts = timeRange.split("-");
+        if (parts.length == 2) {
+            int startHour = Integer.parseInt(parts[0]);
+            int endHour = Integer.parseInt(parts[1]);
+
+            if (endHour == 0) {
+                endHour = 24;
+            }
+
+            return currentHour >= startHour && currentHour < endHour;
+        }
+
+        return false;
     }
 }
