@@ -53,7 +53,7 @@ public class ScheduleDayFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_schedule_day, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        recyclerView.setAdapter(new ScheduleAdapter(schedule));
+        recyclerView.setAdapter(new ScheduleAdapter(getContext(), schedule));
         return view;
     }
 }

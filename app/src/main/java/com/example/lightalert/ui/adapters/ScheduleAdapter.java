@@ -1,5 +1,7 @@
 package com.example.lightalert.ui.adapters;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,9 +9,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.lightalert.R;
+import com.example.lightalert.util.StatusColorUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,8 +27,10 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final String[] statuses;
     private static final int VIEW_TYPE_ITEM = 0;
     private static final int VIEW_TYPE_PADDING = 1;
+    private final Context context;
 
-    public ScheduleAdapter(JSONObject schedule) {
+    public ScheduleAdapter(Context context, JSONObject schedule) {
+        this.context = context;
         this.schedule = schedule;
         int size = schedule.length();
         this.times = new String[size + 1]; // +1 for a fake element (padding from footer)
@@ -80,6 +86,8 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             itemHolder.timeTextView.setText(times[position]);
             itemHolder.statusTextView.setText(statuses[position]);
             Log.d("ScheduleAdapter", "Binding view for time: " + times[position] + ", status: " + statuses[position]);
+
+            itemHolder.statusTextView.setBackgroundColor(StatusColorUtil.getStatusColor(context, statuses[position]));
         }
     }
 

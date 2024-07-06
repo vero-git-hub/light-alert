@@ -32,7 +32,7 @@ public class ScheduleFragment extends Fragment {
             try {
                 scheduleData = new JSONObject(getArguments().getString("scheduleData"));
                 JSONObject daySchedule = scheduleData.getJSONObject(day);
-                ScheduleAdapter scheduleAdapter = new ScheduleAdapter(daySchedule);
+                ScheduleAdapter scheduleAdapter = new ScheduleAdapter(getContext(), daySchedule);
                 recyclerView.setAdapter(scheduleAdapter);
             } catch (JSONException e) {
                 e.printStackTrace();
