@@ -4,8 +4,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +40,7 @@ public class ScheduleDayFragment extends Fragment {
             day = getArguments().getString(ARG_DAY);
             try {
                 schedule = new JSONObject(getArguments().getString(ARG_SCHEDULE));
+                Log.d("ScheduleDayFragment", "Schedule for day: " + day + ", data: " + schedule.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -49,7 +52,7 @@ public class ScheduleDayFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_schedule_day, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.setAdapter(new ScheduleAdapter(schedule));
         return view;
     }
