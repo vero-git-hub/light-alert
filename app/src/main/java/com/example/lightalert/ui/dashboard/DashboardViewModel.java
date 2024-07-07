@@ -25,11 +25,13 @@ public class DashboardViewModel extends AndroidViewModel {
     }
 
     private void loadSchedule(Application application) {
-        try {
-            JSONObject json = FileUtil.loadJSONFromAsset(application, "schedule.json");
-            mSchedule.setValue(json);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new Thread(() -> {
+            try {
+                JSONObject json = FileUtil.loadJSONFromAsset(application, "schedule.json");
+                mSchedule.postValue(json);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }

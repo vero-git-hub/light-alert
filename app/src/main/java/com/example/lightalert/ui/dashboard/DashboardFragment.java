@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -47,6 +48,11 @@ public class DashboardFragment extends Fragment {
         int currentDayIndex = DateUtil.getDayOfWeek();
 
         dashboardViewModel.getSchedule().observe(getViewLifecycleOwner(), scheduleJson -> {
+            if (scheduleJson == null) {
+                Toast.makeText(getContext(), "Failed to load schedule data", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             try {
                 JSONObject scheduleData = scheduleJson.getJSONObject("schedule");
                 List<String> daysOfWeek = new ArrayList<>();
@@ -66,6 +72,7 @@ public class DashboardFragment extends Fragment {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(getContext(), "Error parsing schedule data", Toast.LENGTH_SHORT).show();
             }
         });
 
