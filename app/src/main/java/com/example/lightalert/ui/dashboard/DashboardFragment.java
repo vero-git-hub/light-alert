@@ -1,92 +1,75 @@
 package com.example.lightalert.ui.dashboard;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.lightalert.databinding.FragmentDashboardBinding;
 import com.example.lightalert.R;
-import com.example.lightalert.ui.adapters.SchedulePagerAdapter;
-import com.example.lightalert.util.DateUtil;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 
 public class DashboardFragment extends Fragment {
 
+    private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
-    private ViewPager2 viewPager;
-    private SchedulePagerAdapter schedulePagerAdapter;
-    private TabLayout tabLayout;
-    private TextView weekRangeTextView;
+    private List<String> days;
 
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        tabLayout = root.findViewById(R.id.tabLayout);
-        viewPager = root.findViewById(R.id.viewPager);
-        weekRangeTextView = root.findViewById(R.id.weekRangeTextView);
+        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
-        String weekRange = DateUtil.getCurrentWeekRange();
-        weekRangeTextView.setText(weekRange);
+        days = Arrays.asList(getResources().getStringArray(R.array.days_of_week));
 
-        int currentDayIndex = DateUtil.getDayOfWeek();
+        dashboardViewModel.loadScheduleData(getContext());
 
-        dashboardViewModel.getSchedule().observe(getViewLifecycleOwner(), scheduleJson -> {
-            if (scheduleJson == null) {
-                Toast.makeText(getContext(), "Failed to load schedule data", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        dashboardViewModel.getScheduleData().observe(getViewLifecycleOwner(), new Observer<JSONObject>() {
+            @Override
+            public void onChanged(JSONObject scheduleData) {
+                if (scheduleData != null) {
+                    SchedulePagerAdapter adapter = new SchedulePagerAdapter(getActivity(), days, scheduleData);
+                    ViewPager2 viewPager = binding.viewPager;
+                    viewPager.setAdapter(adapter);
 
-            try {
-                JSONObject scheduleData = scheduleJson.getJSONObject("schedule");
-                List<String> daysOfWeek = new ArrayList<>();
-                Iterator<String> keys = scheduleData.keys();
-                while (keys.hasNext()) {
-                    daysOfWeek.add(keys.next());
+                    viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                        @Override
+                        public void onPageSelected(int position) {
+                            super.onPageSelected(position);
+                            String currentDay = days.get(position);
+                            Log.d("DashboardFragment", "Current day: " + currentDay);
+                        }
+                    });
+
+                    TabLayout tabLayout = binding.tabLayout;
+                    new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(days.get(position))).attach();
                 }
-
-                schedulePagerAdapter = new SchedulePagerAdapter(requireActivity(), scheduleData, daysOfWeek);
-                viewPager.setAdapter(schedulePagerAdapter);
-
-                setDayOfWeek(currentDayIndex);
-
-                new TabLayoutMediator(tabLayout, viewPager,
-                        (tab, position) -> tab.setText(daysOfWeek.get(position))
-                ).attach();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(getContext(), "Error parsing schedule data", Toast.LENGTH_SHORT).show();
             }
         });
 
         return root;
     }
 
-    /**
-     * Setting the current day of the week in TabLayout and ViewPager:
-     * - setting the current page in ViewPager;
-     * - scroll to current tab in TabLayout.
-     * @param currentDayIndex
-     */
-    private void setDayOfWeek(int currentDayIndex) {
-        viewPager.setCurrentItem(currentDayIndex, false);
-        tabLayout.setScrollPosition(currentDayIndex, 0f, true);
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

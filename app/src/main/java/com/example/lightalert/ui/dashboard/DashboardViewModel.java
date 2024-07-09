@@ -1,37 +1,42 @@
 package com.example.lightalert.ui.dashboard;
 
 import android.app.Application;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.lightalert.util.FileUtil;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.content.Context;
 
 public class DashboardViewModel extends AndroidViewModel {
 
-    private final MutableLiveData<JSONObject> mSchedule;
+    private final MutableLiveData<JSONObject> scheduleData = new MutableLiveData<>();
 
     public DashboardViewModel(@NonNull Application application) {
         super(application);
-        mSchedule = new MutableLiveData<>();
-        loadSchedule(application);
     }
 
-    public LiveData<JSONObject> getSchedule() {
-        return mSchedule;
+    public MutableLiveData<JSONObject> getScheduleData() {
+        return scheduleData;
     }
 
-    private void loadSchedule(Application application) {
-        new Thread(() -> {
-            try {
-                JSONObject json = FileUtil.loadJSONFromAsset(application, "schedule.json");
-                mSchedule.postValue(json);
-            } catch (Exception e) {
-                e.printStackTrace();
+    public void loadScheduleData(Context context) {
+        try {
+            String json = FileUtil.loadJSONFromAsset(context, "schedule.json");
+            if (json != null) {
+                JSONObject data = new JSONObject(json).getJSONObject("schedule");
+                scheduleData.setValue(data);
+            } else {
+                scheduleData.setValue(new JSONObject());
             }
-        }).start();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            scheduleData.setValue(new JSONObject());
+        }
     }
 }
