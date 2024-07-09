@@ -15,6 +15,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.lightalert.databinding.FragmentDashboardBinding;
 import com.example.lightalert.R;
+import com.example.lightalert.util.DateUtil;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import org.json.JSONObject;
@@ -26,6 +27,7 @@ public class DashboardFragment extends Fragment {
     private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
     private List<String> days;
+    private int currentDayIndex;
 
     @Nullable
     @Override
@@ -37,6 +39,7 @@ public class DashboardFragment extends Fragment {
         View root = binding.getRoot();
 
         days = Arrays.asList(getResources().getStringArray(R.array.days_of_week));
+        currentDayIndex = DateUtil.getCurrentDayIndex();
 
         dashboardViewModel.loadScheduleData(getContext());
 
@@ -48,12 +51,22 @@ public class DashboardFragment extends Fragment {
                     ViewPager2 viewPager = binding.viewPager;
                     viewPager.setAdapter(adapter);
 
+                    Log.d("DashboardFragment", "Today: " + currentDayIndex);
+                    // Set the current tab to today of the week
+                    viewPager.setCurrentItem(currentDayIndex, false);
+
                     viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                         @Override
                         public void onPageSelected(int position) {
                             super.onPageSelected(position);
-                            String currentDay = days.get(position);
-                            Log.d("DashboardFragment", "Current day: " + currentDay);
+                            String selectedDay = days.get(position);
+                            Log.d("DashboardFragment", "Selected day: " + selectedDay);
+
+                            if (position == currentDayIndex) {
+                                Log.d("DashboardFragment", "Selected day is today.");
+                            } else {
+                                Log.d("DashboardFragment", "Selected day is not today.");
+                            }
                         }
                     });
 
