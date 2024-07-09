@@ -54,6 +54,10 @@ public class DashboardFragment extends Fragment {
                     Log.d("DashboardFragment", "Today: " + currentDayIndex);
                     // Set the current tab to today of the week
                     viewPager.setCurrentItem(currentDayIndex, false);
+                    if (currentDayIndex == viewPager.getCurrentItem()) {
+                        String currentTime = DateUtil.getCurrentTime();
+                        Log.d("DashboardFragment", "Initial load - Current time: " + currentTime);
+                    }
 
                     viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                         @Override
@@ -64,6 +68,9 @@ public class DashboardFragment extends Fragment {
 
                             if (position == currentDayIndex) {
                                 Log.d("DashboardFragment", "Selected day is today.");
+
+                                String currentTime = DateUtil.getCurrentTime();
+                                Log.d("DashboardFragment", "Current time: " + currentTime);
                             } else {
                                 Log.d("DashboardFragment", "Selected day is not today.");
                             }

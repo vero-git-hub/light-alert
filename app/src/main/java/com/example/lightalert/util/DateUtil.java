@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -69,5 +70,14 @@ public class DateUtil {
             default:
                 return 0;
         }
+    }
+
+    public static String getCurrentTime() {
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Kiev");
+        Calendar calendar = Calendar.getInstance(timeZone);
+        Date date = calendar.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        sdf.setTimeZone(timeZone);
+        return sdf.format(date);
     }
 }
