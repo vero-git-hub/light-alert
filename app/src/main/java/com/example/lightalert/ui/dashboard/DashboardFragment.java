@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +41,8 @@ public class DashboardFragment extends Fragment {
 
         days = Arrays.asList(getResources().getStringArray(R.array.days_of_week));
         currentDayIndex = DateUtil.getCurrentDayIndex();
+
+        setCurrentWeekDates();
 
         dashboardViewModel.loadScheduleData(getContext());
 
@@ -84,6 +87,13 @@ public class DashboardFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private void setCurrentWeekDates() {
+        String weekDates = DateUtil.getCurrentWeekDates();
+        TextView weekDatesTextView = binding.textWeekDates;
+        weekDatesTextView.setText(weekDates);
+        weekDatesTextView.setPadding(0, 24, 0, 0);
     }
 
 
