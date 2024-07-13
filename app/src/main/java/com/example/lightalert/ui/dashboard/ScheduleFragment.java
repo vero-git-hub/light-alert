@@ -1,5 +1,6 @@
 package com.example.lightalert.ui.dashboard;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,17 +10,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.lightalert.R;
+import com.example.lightalert.util.StatusColorUtil;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.Iterator;
+
+import android.view.Gravity;
 
 public class ScheduleFragment extends Fragment {
 
     private static final String ARG_DAY = "day";
     private static final String ARG_SCHEDULE = "schedule";
+    private static final String TAG = "ScheduleFragment";
 
     public static ScheduleFragment newInstance(String day, JSONObject schedule) {
         ScheduleFragment fragment = new ScheduleFragment();
@@ -33,48 +39,93 @@ public class ScheduleFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("ScheduleFragment", "onCreate: " + getArguments().getString(ARG_DAY));
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d("ScheduleFragment", "onCreateView: " + getArguments().getString(ARG_DAY));
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        TextView scheduleTextView = view.findViewById(R.id.text_schedule);
 
         if (getArguments() != null) {
             String day = getArguments().getString(ARG_DAY);
             String scheduleString = getArguments().getString(ARG_SCHEDULE);
             try {
-                Log.d("ScheduleFragment", "Day: " + day + ", Schedule: " + scheduleString);
                 JSONObject schedule = new JSONObject(scheduleString);
-                StringBuilder scheduleText = new StringBuilder(day + "\n\n");
-                Iterator<String> keys = schedule.keys();
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    String value = schedule.getString(key);
-                    scheduleText.append(key).append(": ").append(value).append("\n");
-                }
-                scheduleTextView.setText(scheduleText.toString());
+                displaySchedule(view, schedule);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("ScheduleFragment", "Failed to parse schedule for " + day, e);
+                Log.e(TAG, "Error parsing schedule JSON", e);
             }
         }
 
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("ScheduleFragment", "onResume: " + getArguments().getString(ARG_DAY));
+    private void displaySchedule(View view, JSONObject schedule) throws JSONException {
+        LinearLayout hoursContainer = view.findViewById(R.id.hours_container);
+
+        for (int i = 0; i < 24; i++) {
+            String startHour = String.format("%02d", i);
+            String endHour = String.format("%02d", i + 1);
+            String key = startHour + "-" + endHour;
+            String status = schedule.optString(key);
+
+            Log.d(TAG, "Hour: " + i + ", Status: " + status);
+
+            LinearLayout hourLayout = new LinearLayout(getContext());
+            hourLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+            TextView hourView = new TextView(getContext());
+            hourView.setText(String.valueOf(i));
+            hourView.setTextSize(18);
+            hourView.setTextColor(Color.BLACK);
+            hourView.setGravity(Gravity.CENTER_VERTICAL | Gravity.END);
+
+            View statusView = new View(getContext());
+            statusView.setBackgroundColor(StatusColorUtil.getStatusColor(getContext(), status));
+            Log.d(TAG, "Color for status " + status + ": " + StatusColorUtil.getStatusColor(getContext(), status));
+
+            LinearLayout.LayoutParams hourParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    1.0f
+            );
+            hourView.setLayoutParams(hourParams);
+
+            LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    4.0f
+            );
+            statusView.setLayoutParams(statusParams);
+
+            hourLayout.addView(hourView);
+            hourLayout.addView(statusView);
+
+            LinearLayout.LayoutParams hourLayoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            hourLayout.setLayoutParams(hourLayoutParams);
+
+            hoursContainer.addView(hourLayout);
+
+            Log.d(TAG, "Added hour layout for hour: " + i);
+        }
+
+        View fakeBottomView = new View(getContext());
+        LinearLayout.LayoutParams fakeBottomParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                300
+        );
+        fakeBottomView.setLayoutParams(fakeBottomParams);
+        hoursContainer.addView(fakeBottomView);
+
+        Log.d(TAG, "Total child count in hours container: " + hoursContainer.getChildCount());
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("ScheduleFragment", "onPause: " + getArguments().getString(ARG_DAY));
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }
