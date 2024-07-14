@@ -1,7 +1,5 @@
 package com.example.lightalert.ui.dashboard;
 
-import android.util.Log;
-
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -29,7 +27,7 @@ public class SchedulePagerAdapter extends FragmentStateAdapter {
         if (daySchedule == null) {
             daySchedule = new JSONObject();
         }
-        Log.d("SchedulePagerAdapter", "Creating fragment for day: " + day);
+
         return ScheduleFragment.newInstance(day, daySchedule);
     }
 

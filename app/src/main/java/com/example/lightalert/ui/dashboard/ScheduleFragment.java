@@ -1,6 +1,5 @@
 package com.example.lightalert.ui.dashboard;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +18,8 @@ import com.example.lightalert.util.StatusColorUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.view.Gravity;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScheduleFragment extends Fragment {
 
@@ -51,7 +51,8 @@ public class ScheduleFragment extends Fragment {
             String scheduleString = getArguments().getString(ARG_SCHEDULE);
             try {
                 JSONObject schedule = new JSONObject(scheduleString);
-                displaySchedule(view, schedule);
+                List<HourStatus> hourStatuses = parseSchedule(schedule);
+                displaySchedule(view, hourStatuses);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "Error parsing schedule JSON", e);
@@ -61,67 +62,61 @@ public class ScheduleFragment extends Fragment {
         return view;
     }
 
-    private void displaySchedule(View view, JSONObject schedule) throws JSONException {
-        LinearLayout hoursContainer = view.findViewById(R.id.hours_container);
+    private List<HourStatus> parseSchedule(JSONObject schedule) throws JSONException {
+        List<HourStatus> hourStatuses = new ArrayList<>();
 
-        for (int i = 0; i < 24; i++) {
+        for (int i = 0; i <= 24; i++) {
             String startHour = String.format("%02d", i);
             String endHour = String.format("%02d", i + 1);
             String key = startHour + "-" + endHour;
-            String status = schedule.optString(key);
+            String status = schedule.optString(key, "none");
 
-            Log.d(TAG, "Hour: " + i + ", Status: " + status);
+            String topPart = "none";
+            String bottomPart = "none";
 
-            LinearLayout hourLayout = new LinearLayout(getContext());
-            hourLayout.setOrientation(LinearLayout.HORIZONTAL);
+            if (schedule.has(key)) {
+                bottomPart = schedule.optString(key);
+            }
 
-            TextView hourView = new TextView(getContext());
-            hourView.setText(String.valueOf(i));
-            hourView.setTextSize(18);
-            hourView.setTextColor(Color.BLACK);
-            hourView.setGravity(Gravity.CENTER_VERTICAL | Gravity.END);
+            String prevKey = String.format("%02d", i - 1) + "-" + startHour;
+            if (schedule.has(prevKey)) {
+                topPart = schedule.optString(prevKey);
+            }
 
-            View statusView = new View(getContext());
-            statusView.setBackgroundColor(StatusColorUtil.getStatusColor(getContext(), status));
-            Log.d(TAG, "Color for status " + status + ": " + StatusColorUtil.getStatusColor(getContext(), status));
+            hourStatuses.add(new HourStatus(i, topPart, bottomPart));
+        }
 
-            LinearLayout.LayoutParams hourParams = new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    1.0f
-            );
-            hourView.setLayoutParams(hourParams);
+        return hourStatuses;
+    }
 
-            LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    4.0f
-            );
-            statusView.setLayoutParams(statusParams);
+    private void displaySchedule(View view, List<HourStatus> hourStatuses) {
+        LinearLayout hoursContainer = view.findViewById(R.id.hours_container);
 
-            hourLayout.addView(hourView);
-            hourLayout.addView(statusView);
+        for (HourStatus hourStatus : hourStatuses) {
+            View hourView = LayoutInflater.from(getContext()).inflate(R.layout.schedule_item, hoursContainer, false);
 
-            LinearLayout.LayoutParams hourLayoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            hourLayout.setLayoutParams(hourLayoutParams);
+            TextView timeTextView = hourView.findViewById(R.id.timeTextView);
+            View topPartView = hourView.findViewById(R.id.topPartView);
+            View bottomPartView = hourView.findViewById(R.id.bottomPartView);
 
-            hoursContainer.addView(hourLayout);
+            timeTextView.setText(String.valueOf(hourStatus.getHour()));
 
-            Log.d(TAG, "Added hour layout for hour: " + i);
+            int topColor = StatusColorUtil.getColorForStatus(getContext(), hourStatus.getTopPart());
+            topPartView.setBackgroundColor(topColor);
+
+            int bottomColor = StatusColorUtil.getColorForStatus(getContext(), hourStatus.getBottomPart());
+            bottomPartView.setBackgroundColor(bottomColor);
+
+            hoursContainer.addView(hourView);
         }
 
         View fakeBottomView = new View(getContext());
         LinearLayout.LayoutParams fakeBottomParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                300
+                200
         );
         fakeBottomView.setLayoutParams(fakeBottomParams);
         hoursContainer.addView(fakeBottomView);
-
-        Log.d(TAG, "Total child count in hours container: " + hoursContainer.getChildCount());
     }
 
     @Override
