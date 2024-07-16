@@ -97,7 +97,7 @@ public class ScheduleFragment extends Fragment {
     private List<HourStatus> parseSchedule(JSONObject schedule) throws JSONException {
         List<HourStatus> hourStatuses = new ArrayList<>();
 
-        for (int i = 0; i < 24; i++) {
+        for (int i = 0; i <= 24; i++) {
             String startHour = String.format("%02d", i);
             String endHour = String.format("%02d", i + 1);
             String key = startHour + "-" + endHour;
@@ -152,7 +152,7 @@ public class ScheduleFragment extends Fragment {
 
             TextView hourView = new TextView(getContext());
             hourView.setText(String.valueOf(hourStatus.getHour()));
-            hourView.setTextSize(18);
+            hourView.setTextSize(17);
             hourView.setTextColor(Color.BLACK);
             hourView.setGravity(Gravity.CENTER);
 
