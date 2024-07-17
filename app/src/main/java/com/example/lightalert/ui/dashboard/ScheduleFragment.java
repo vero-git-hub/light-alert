@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import com.example.lightalert.R;
@@ -152,7 +153,7 @@ public class ScheduleFragment extends Fragment {
 
             TextView hourView = new TextView(getContext());
             hourView.setText(String.valueOf(hourStatus.getHour()));
-            hourView.setTextSize(17);
+            hourView.setTextSize(16);
             hourView.setTextColor(Color.BLACK);
             hourView.setGravity(Gravity.CENTER);
 
@@ -188,31 +189,42 @@ public class ScheduleFragment extends Fragment {
             hoursContainer.addView(hourLayout);
         }
 
-        View fakeBottomView = new View(getContext());
-        LinearLayout.LayoutParams fakeBottomParams = new LinearLayout.LayoutParams(
+        Space bottomSpace = new Space(getContext());
+        LinearLayout.LayoutParams spaceParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                200
+                125
         );
-        fakeBottomView.setLayoutParams(fakeBottomParams);
-        hoursContainer.addView(fakeBottomView);
-
-        Log.d(TAG, "Total child count in hours container: " + hoursContainer.getChildCount());
+        bottomSpace.setLayoutParams(spaceParams);
+        hoursContainer.addView(bottomSpace);
     }
 
     private void updateMarkerPosition() {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Kiev"));
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        float percentageOfDay = (hour * 60 + minute) / (24f * 60f);
+        float percentageOfHour = minute / 60f;
 
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) marker.getLayoutParams();
-        int parentHeight = timeline.getHeight();
-        int newMarginTop = (int) (parentHeight * percentageOfDay);
+        LinearLayout hoursContainer = getView().findViewById(R.id.hours_container);
+        int totalChildren = hoursContainer.getChildCount() - 1;
 
-        params.topMargin = newMarginTop;
-        marker.setLayoutParams(params);
+        int containerHeight = timeline.getHeight();
+        int elementHeight = containerHeight / totalChildren;
+        int hourHeight = hour * elementHeight;
+        int minuteHeight = (int) (percentageOfHour * elementHeight);
+
+        int newMarginTop = hourHeight + minuteHeight;
+        newMarginTop -= 10;
+
+        ConstraintLayout.LayoutParams markerParams = (ConstraintLayout.LayoutParams) marker.getLayoutParams();
+        markerParams.topMargin = newMarginTop;
+        marker.setLayoutParams(markerParams);
+
+        View horizontalLine = getView().findViewById(R.id.horizontal_line);
+        ConstraintLayout.LayoutParams lineParams = (ConstraintLayout.LayoutParams) horizontalLine.getLayoutParams();
+        lineParams.topMargin = newMarginTop;
+        lineParams.horizontalBias = 0.5f;
+        horizontalLine.setLayoutParams(lineParams);
     }
-
 
     @Override
     public void onDestroyView() {
