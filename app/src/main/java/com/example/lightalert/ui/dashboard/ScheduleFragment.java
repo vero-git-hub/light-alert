@@ -213,10 +213,11 @@ public class ScheduleFragment extends Fragment {
         int minuteHeight = (int) (percentageOfHour * elementHeight);
 
         int newMarginTop = hourHeight + minuteHeight;
-        newMarginTop -= 10;
+        newMarginTop -= 70;
 
         ConstraintLayout.LayoutParams markerParams = (ConstraintLayout.LayoutParams) marker.getLayoutParams();
         markerParams.topMargin = newMarginTop;
+        markerParams.leftMargin = 100;
         marker.setLayoutParams(markerParams);
 
         View horizontalLine = getView().findViewById(R.id.horizontal_line);
