@@ -1,11 +1,11 @@
 package com.example.lightalert.ui.dashboard;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +30,8 @@ public class DashboardFragment extends Fragment {
     private DashboardViewModel dashboardViewModel;
     private List<String> days;
     private int currentDayIndex;
+    private Handler handler;
+    private Runnable updateDayTask;
 
     @Nullable
     @Override
@@ -55,7 +57,6 @@ public class DashboardFragment extends Fragment {
                     ViewPager2 viewPager = binding.viewPager;
                     viewPager.setAdapter(adapter);
 
-                    Log.d("DashboardFragment", "Today: " + currentDayIndex);
                     // Set the current tab to today of the week
                     viewPager.setCurrentItem(currentDayIndex, false);
                     if (currentDayIndex == viewPager.getCurrentItem()) {
@@ -68,7 +69,6 @@ public class DashboardFragment extends Fragment {
                         public void onPageSelected(int position) {
                             super.onPageSelected(position);
                             String selectedDay = days.get(position);
-                            Log.d("DashboardFragment", "Selected day: " + selectedDay);
 
                             if (position == currentDayIndex) {
                                 Log.d("DashboardFragment", "Selected day is today.");
@@ -89,7 +89,35 @@ public class DashboardFragment extends Fragment {
             }
         });
 
+        handler = new Handler();
+        updateDayTask = new Runnable() {
+            @Override
+            public void run() {
+                int newDayIndex = DateUtil.getCurrentDayIndex();
+                if (newDayIndex != currentDayIndex) {
+                    currentDayIndex = newDayIndex;
+                    applyHighlightToCurrentDay(binding.tabLayout);
+                    binding.viewPager.setCurrentItem(currentDayIndex, true);
+                }
+                handler.postDelayed(this, 60000);
+            }
+        };
+        handler.post(updateDayTask);
+
         return root;
+    }
+
+    private void applyHighlightToCurrentDay(TabLayout tabLayout) {
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null && tab.view != null) {
+                if (i == currentDayIndex) {
+                    tab.view.setBackgroundResource(R.drawable.tab_highlight);
+                } else {
+                    tab.view.setBackgroundResource(0);
+                }
+            }
+        }
     }
 
     private void setCurrentWeekDates() {
@@ -102,6 +130,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        handler.removeCallbacks(updateDayTask);
         binding = null;
     }
 }
