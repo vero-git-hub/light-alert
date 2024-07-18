@@ -32,6 +32,8 @@ public class DashboardFragment extends Fragment {
     private int currentDayIndex;
     private Handler handler;
     private Runnable updateDayTask;
+    private SchedulePagerAdapter adapter;
+    private ViewPager2 viewPager;
 
     @Nullable
     @Override
@@ -45,34 +47,33 @@ public class DashboardFragment extends Fragment {
         days = Arrays.asList(getResources().getStringArray(R.array.days_of_week));
         currentDayIndex = DateUtil.getCurrentDayIndex();
 
-        setCurrentWeekDates();
-
         dashboardViewModel.loadScheduleData(getContext());
 
         dashboardViewModel.getScheduleData().observe(getViewLifecycleOwner(), new Observer<JSONObject>() {
             @Override
             public void onChanged(JSONObject scheduleData) {
                 if (scheduleData != null) {
-                    SchedulePagerAdapter adapter = new SchedulePagerAdapter(getActivity(), days, scheduleData, currentDayIndex);
-                    ViewPager2 viewPager = binding.viewPager;
+                    adapter = new SchedulePagerAdapter(getActivity(), days, scheduleData, currentDayIndex);
+                    viewPager = binding.viewPager;
                     viewPager.setAdapter(adapter);
 
                     // Set the current tab to today of the week
                     viewPager.setCurrentItem(currentDayIndex, false);
-                    if (currentDayIndex == viewPager.getCurrentItem()) {
-                        String currentTime = DateUtil.getCurrentTime();
-                    }
 
                     viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                         @Override
                         public void onPageSelected(int position) {
                             super.onPageSelected(position);
-                            String selectedDay = days.get(position);
+                        }
 
-                            if (position == currentDayIndex) {
-                                String currentTime = DateUtil.getCurrentTime();
-                            } else {
-                                Log.d("DashboardFragment", "Selected day is not today.");
+                        @Override
+                        public void onPageScrollStateChanged(int state) {
+                            if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                                if (viewPager.getCurrentItem() == 0) {
+                                    viewPager.setCurrentItem(days.size() - 1, false);
+                                } else if (viewPager.getCurrentItem() == days.size() - 1) {
+                                    viewPager.setCurrentItem(0, false);
+                                }
                             }
                         }
                     });
@@ -116,12 +117,6 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    private void setCurrentWeekDates() {
-//        String weekDates = DateUtil.getCurrentWeekDates();
-//        TextView weekDatesTextView = binding.textWeekDates;
-//        weekDatesTextView.setText(weekDates);
-//        weekDatesTextView.setPadding(0, 24, 0, 0);
-    }
 
     @Override
     public void onDestroyView() {
