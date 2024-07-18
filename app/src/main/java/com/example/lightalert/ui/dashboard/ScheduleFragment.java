@@ -35,10 +35,12 @@ public class ScheduleFragment extends Fragment {
 
     private static final String ARG_DAY = "day";
     private static final String ARG_SCHEDULE = "schedule";
+    private static final String ARG_CURRENT_DAY_INDEX = "current_day_index";
     private static final String TAG = "ScheduleFragment";
 
     private ImageView marker;
     private View timeline;
+    private View horizontalLine;
     private Handler handler = new Handler();
     private Runnable updateTimeTask = new Runnable() {
         @Override
@@ -48,11 +50,13 @@ public class ScheduleFragment extends Fragment {
         }
     };
 
-    public static ScheduleFragment newInstance(String day, JSONObject schedule) {
+    public static ScheduleFragment newInstance(String day, JSONObject schedule, int currentDayIndex, int position) {
         ScheduleFragment fragment = new ScheduleFragment();
         Bundle args = new Bundle();
         args.putString(ARG_DAY, day);
         args.putString(ARG_SCHEDULE, schedule.toString());
+        args.putInt(ARG_CURRENT_DAY_INDEX, currentDayIndex);
+        args.putInt("position", position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -69,10 +73,20 @@ public class ScheduleFragment extends Fragment {
 
         marker = view.findViewById(R.id.marker);
         timeline = view.findViewById(R.id.timeline);
+        horizontalLine = view.findViewById(R.id.horizontal_line);
 
         if (getArguments() != null) {
             String day = getArguments().getString(ARG_DAY);
             String scheduleString = getArguments().getString(ARG_SCHEDULE);
+            int currentDayIndex = getArguments().getInt(ARG_CURRENT_DAY_INDEX);
+            int position = getArguments().getInt("position");
+
+            if (position != currentDayIndex) {
+                marker.setVisibility(View.GONE);
+                timeline.setVisibility(View.GONE);
+                horizontalLine.setVisibility(View.GONE);
+            }
+
             try {
                 JSONObject schedule = new JSONObject(scheduleString);
                 List<HourStatus> hourStatuses = parseSchedule(schedule);
@@ -83,14 +97,16 @@ public class ScheduleFragment extends Fragment {
             }
         }
 
-        timeline.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                timeline.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                updateMarkerPosition();
-                handler.post(updateTimeTask);
-            }
-        });
+        if (marker.getVisibility() == View.VISIBLE) {
+            timeline.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    timeline.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    updateMarkerPosition();
+                    handler.post(updateTimeTask);
+                }
+            });
+        }
 
         return view;
     }
@@ -126,8 +142,6 @@ public class ScheduleFragment extends Fragment {
         LinearLayout hoursContainer = view.findViewById(R.id.hours_container);
 
         for (HourStatus hourStatus : hourStatuses) {
-            Log.d(TAG, "Hour: " + hourStatus.getHour() + ", Top Part: " + hourStatus.getTopPart() + ", Bottom Part: " + hourStatus.getBottomPart());
-
             LinearLayout hourLayout = new LinearLayout(getContext());
             hourLayout.setOrientation(LinearLayout.HORIZONTAL);
 
@@ -205,28 +219,36 @@ public class ScheduleFragment extends Fragment {
         float percentageOfHour = minute / 60f;
 
         LinearLayout hoursContainer = getView().findViewById(R.id.hours_container);
-        int totalChildren = hoursContainer.getChildCount() - 1;
+        int totalChildren = hoursContainer.getChildCount();
 
         int containerHeight = timeline.getHeight();
-        int elementHeight = containerHeight / totalChildren;
-        int hourHeight = hour * elementHeight;
-        int minuteHeight = (int) (percentageOfHour * elementHeight);
+        if (containerHeight == 0) {
+            return;
+        }
 
-        int newMarginTop = hourHeight + minuteHeight;
-        newMarginTop -= 105;
+        int elementHeight = totalChildren > 0 ? containerHeight / totalChildren : 0;
 
-        ConstraintLayout.LayoutParams markerParams = (ConstraintLayout.LayoutParams) marker.getLayoutParams();
-        markerParams.topMargin = newMarginTop - 10;
-        markerParams.leftMargin = 100;
-        marker.setLayoutParams(markerParams);
+        if (elementHeight > 0) {
+            int hourHeight = hour * elementHeight;
+            int minuteHeight = (int) (percentageOfHour * elementHeight);
 
-        View horizontalLine = getView().findViewById(R.id.horizontal_line);
-        ConstraintLayout.LayoutParams lineParams = (ConstraintLayout.LayoutParams) horizontalLine.getLayoutParams();
-        lineParams.topMargin = newMarginTop;
-        lineParams.horizontalBias = 0.5f;
-        lineParams.leftMargin = 200;
-        lineParams.width = 810;
-        horizontalLine.setLayoutParams(lineParams);
+            int newMarginTop = hourHeight + minuteHeight;
+            newMarginTop -= 60;
+
+            ConstraintLayout.LayoutParams markerParams = (ConstraintLayout.LayoutParams) marker.getLayoutParams();
+            markerParams.leftMargin = 100;
+            markerParams.topMargin = newMarginTop - 10;
+            marker.setLayoutParams(markerParams);
+
+            ConstraintLayout.LayoutParams lineParams = (ConstraintLayout.LayoutParams) horizontalLine.getLayoutParams();
+            lineParams.topMargin = newMarginTop;
+//            lineParams.horizontalBias = 0.5f;
+            lineParams.leftMargin = 200;
+            lineParams.width = 810;
+            horizontalLine.setLayoutParams(lineParams);
+        } else {
+            Log.e(TAG, "Element height is zero or less, cannot update marker position.");
+        }
     }
 
     @Override

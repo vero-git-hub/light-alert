@@ -12,11 +12,13 @@ public class SchedulePagerAdapter extends FragmentStateAdapter {
 
     private final List<String> days;
     private final JSONObject scheduleData;
+    private int currentDayIndex;
 
-    public SchedulePagerAdapter(@NonNull FragmentActivity fragmentActivity, List<String> days, JSONObject scheduleData) {
+    public SchedulePagerAdapter(@NonNull FragmentActivity fragmentActivity, List<String> days, JSONObject scheduleData, int currentDayIndex) {
         super(fragmentActivity);
         this.days = days;
         this.scheduleData = scheduleData;
+        this.currentDayIndex = currentDayIndex;
     }
 
     @NonNull
@@ -28,7 +30,7 @@ public class SchedulePagerAdapter extends FragmentStateAdapter {
             daySchedule = new JSONObject();
         }
 
-        return ScheduleFragment.newInstance(day, daySchedule);
+        return ScheduleFragment.newInstance(day, daySchedule, currentDayIndex, position);
     }
 
     @Override

@@ -53,7 +53,7 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onChanged(JSONObject scheduleData) {
                 if (scheduleData != null) {
-                    SchedulePagerAdapter adapter = new SchedulePagerAdapter(getActivity(), days, scheduleData);
+                    SchedulePagerAdapter adapter = new SchedulePagerAdapter(getActivity(), days, scheduleData, currentDayIndex);
                     ViewPager2 viewPager = binding.viewPager;
                     viewPager.setAdapter(adapter);
 
@@ -61,7 +61,6 @@ public class DashboardFragment extends Fragment {
                     viewPager.setCurrentItem(currentDayIndex, false);
                     if (currentDayIndex == viewPager.getCurrentItem()) {
                         String currentTime = DateUtil.getCurrentTime();
-                        Log.d("DashboardFragment", "Initial load - Current time: " + currentTime);
                     }
 
                     viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -71,10 +70,7 @@ public class DashboardFragment extends Fragment {
                             String selectedDay = days.get(position);
 
                             if (position == currentDayIndex) {
-                                Log.d("DashboardFragment", "Selected day is today.");
-
                                 String currentTime = DateUtil.getCurrentTime();
-                                Log.d("DashboardFragment", "Current time: " + currentTime);
                             } else {
                                 Log.d("DashboardFragment", "Selected day is not today.");
                             }
