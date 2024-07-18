@@ -16,6 +16,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.lightalert.databinding.FragmentDashboardBinding;
 import com.example.lightalert.R;
+import com.example.lightalert.util.ColorUtil;
 import com.example.lightalert.util.DateUtil;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -82,6 +83,8 @@ public class DashboardFragment extends Fragment {
 
                     TabLayout tabLayout = binding.tabLayout;
                     new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(days.get(position))).attach();
+
+                    ColorUtil.applyHighlightToCurrentDay(tabLayout, currentDayIndex);
                 }
             }
         });
@@ -90,12 +93,11 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setCurrentWeekDates() {
-        String weekDates = DateUtil.getCurrentWeekDates();
-        TextView weekDatesTextView = binding.textWeekDates;
-        weekDatesTextView.setText(weekDates);
-        weekDatesTextView.setPadding(0, 24, 0, 0);
+//        String weekDates = DateUtil.getCurrentWeekDates();
+//        TextView weekDatesTextView = binding.textWeekDates;
+//        weekDatesTextView.setText(weekDates);
+//        weekDatesTextView.setPadding(0, 24, 0, 0);
     }
-
 
     @Override
     public void onDestroyView() {

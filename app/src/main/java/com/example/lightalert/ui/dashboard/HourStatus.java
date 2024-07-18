@@ -34,4 +34,13 @@ public class HourStatus {
     public void setBottomPart(String bottomPart) {
         this.bottomPart = bottomPart;
     }
+
+    @Override
+    public String toString() {
+        return "HourStatus{" +
+                "hour=" + hour +
+                ", topPart='" + topPart + '\'' +
+                ", bottomPart='" + bottomPart + '\'' +
+                '}';
+    }
 }
