@@ -28,7 +28,7 @@ public class DashboardFragment extends Fragment {
 
     private FragmentDashboardBinding binding;
     private DashboardViewModel dashboardViewModel;
-    private List<String> days;
+    private List<String> daysOfWeek;
     private int currentDayIndex;
     private Handler handler;
     private Runnable updateDayTask;
@@ -44,7 +44,7 @@ public class DashboardFragment extends Fragment {
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        days = Arrays.asList(getResources().getStringArray(R.array.days_of_week));
+        daysOfWeek = Arrays.asList(getResources().getStringArray(R.array.days_of_week));
         currentDayIndex = DateUtil.getCurrentDayIndex();
 
         dashboardViewModel.loadScheduleData(getContext());
@@ -53,7 +53,7 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onChanged(JSONObject scheduleData) {
                 if (scheduleData != null) {
-                    adapter = new SchedulePagerAdapter(getActivity(), days, scheduleData, currentDayIndex);
+                    adapter = new SchedulePagerAdapter(getActivity(), daysOfWeek, scheduleData, currentDayIndex);
                     viewPager = binding.viewPager;
                     viewPager.setAdapter(adapter);
 
@@ -70,8 +70,8 @@ public class DashboardFragment extends Fragment {
                         public void onPageScrollStateChanged(int state) {
                             if (state == ViewPager2.SCROLL_STATE_IDLE) {
                                 if (viewPager.getCurrentItem() == 0) {
-                                    viewPager.setCurrentItem(days.size() - 1, false);
-                                } else if (viewPager.getCurrentItem() == days.size() - 1) {
+                                    viewPager.setCurrentItem(daysOfWeek.size() - 1, false);
+                                } else if (viewPager.getCurrentItem() == daysOfWeek.size() - 1) {
                                     viewPager.setCurrentItem(0, false);
                                 }
                             }
@@ -79,7 +79,7 @@ public class DashboardFragment extends Fragment {
                     });
 
                     TabLayout tabLayout = binding.tabLayout;
-                    new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(days.get(position))).attach();
+                    new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(daysOfWeek.get(position))).attach();
 
                     ColorUtil.applyHighlightToCurrentDay(tabLayout, currentDayIndex);
                 }
