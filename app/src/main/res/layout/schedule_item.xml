@@ -11,7 +11,8 @@
         android:layout_weight="1"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:gravity="center_vertical|end" />
+        android:gravity="center_vertical|end"
+        android:paddingEnd="4dp"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -23,12 +24,20 @@
             android:id="@+id/topPartView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
 
         <View
             android:id="@+id/bottomPartView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/infoIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_info"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"/>
 </LinearLayout>

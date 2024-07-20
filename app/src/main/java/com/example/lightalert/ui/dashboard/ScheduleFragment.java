@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import android.graphics.Color;
+
 import android.os.Handler;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -114,7 +113,7 @@ public class ScheduleFragment extends Fragment {
     private List<HourStatus> parseSchedule(JSONObject schedule) throws JSONException {
         List<HourStatus> hourStatuses = new ArrayList<>();
 
-        for (int i = 0; i <= 24; i++) {
+        for (int i = 0; i < 24; i++) {
             String startHour = String.format("%02d", i);
             String endHour = String.format("%02d", i + 1);
             String key = startHour + "-" + endHour;
@@ -140,65 +139,18 @@ public class ScheduleFragment extends Fragment {
 
     private void displaySchedule(View view, List<HourStatus> hourStatuses) {
         LinearLayout hoursContainer = view.findViewById(R.id.hours_container);
+        LinearLayout colorsContainer = view.findViewById(R.id.colors_container);
 
         for (HourStatus hourStatus : hourStatuses) {
-            LinearLayout hourLayout = new LinearLayout(getContext());
-            hourLayout.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout hourLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.schedule_item, null);
+            TextView timeTextView = hourLayout.findViewById(R.id.timeTextView);
+            timeTextView.setText(String.format("%02d:00", hourStatus.getHour()));
 
-            View topPartView = new View(getContext());
+            View topPartView = hourLayout.findViewById(R.id.topPartView);
             topPartView.setBackgroundColor(StatusColorUtil.getColorForStatus(getContext(), hourStatus.getTopPart()));
 
-            LinearLayout.LayoutParams topPartParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0,
-                    1.0f
-            );
-            topPartView.setLayoutParams(topPartParams);
-
-            View bottomPartView = new View(getContext());
+            View bottomPartView = hourLayout.findViewById(R.id.bottomPartView);
             bottomPartView.setBackgroundColor(StatusColorUtil.getColorForStatus(getContext(), hourStatus.getBottomPart()));
-
-            LinearLayout.LayoutParams bottomPartParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0,
-                    1.0f
-            );
-            bottomPartView.setLayoutParams(bottomPartParams);
-
-            TextView hourView = new TextView(getContext());
-            hourView.setText(String.valueOf(hourStatus.getHour()));
-            hourView.setTextSize(16);
-            hourView.setTextColor(Color.BLACK);
-            hourView.setGravity(Gravity.CENTER);
-
-            LinearLayout.LayoutParams hourParams = new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0.2f
-            );
-            hourView.setLayoutParams(hourParams);
-
-            LinearLayout verticalContainer = new LinearLayout(getContext());
-            verticalContainer.setOrientation(LinearLayout.VERTICAL);
-            verticalContainer.addView(topPartView);
-            verticalContainer.addView(bottomPartView);
-
-            LinearLayout.LayoutParams verticalContainerParams = new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0.8f
-            );
-            verticalContainer.setLayoutParams(verticalContainerParams);
-
-            hourLayout.addView(hourView);
-            hourLayout.addView(verticalContainer);
-
-            LinearLayout.LayoutParams hourLayoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0,
-                    1.0f
-            );
-            hourLayout.setLayoutParams(hourLayoutParams);
 
             hoursContainer.addView(hourLayout);
         }
@@ -242,7 +194,6 @@ public class ScheduleFragment extends Fragment {
 
             ConstraintLayout.LayoutParams lineParams = (ConstraintLayout.LayoutParams) horizontalLine.getLayoutParams();
             lineParams.topMargin = newMarginTop;
-//            lineParams.horizontalBias = 0.5f;
             lineParams.leftMargin = 200;
             lineParams.width = 810;
             horizontalLine.setLayoutParams(lineParams);
