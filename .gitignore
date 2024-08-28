@@ -1,3 +1,4 @@
+# Android Studio/IntelliJ IDEA specific files
 *.iml
 .gradle
 /local.properties
@@ -7,9 +8,37 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/misc.xml
+/.idea/gradle.xml
+/.idea/
+
+# macOS specific files
 .DS_Store
+
+# Gradle specific files
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+/.gradle
+gradle-app.setting
+
+# Visual Studio Code specific files
+.vscode/
+
+# Log files
+*.log
+
+# Temporary files
+.tmp/
+.temp/
+*.tmp
+*.temp
+*.bak
+
+# Specific files in res/values
+app/src/main/res/values/strings.xml
+app/src/main/res/values/themes.xml
+
+# Specific files in assets
+app/src/main/assets/schedule.json

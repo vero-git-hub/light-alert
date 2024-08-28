@@ -2,13 +2,13 @@ package com.example.lightalert.ui.dashboard;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -21,6 +21,10 @@ import com.example.lightalert.util.DateUtil;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import org.json.JSONObject;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -96,12 +100,28 @@ public class DashboardFragment extends Fragment {
                     applyHighlightToCurrentDay(binding.tabLayout);
                     binding.viewPager.setCurrentItem(currentDayIndex, true);
                 }
+                // Update time in title
+                updateToolbarTitle();
+
                 handler.postDelayed(this, 60000);
             }
         };
         handler.post(updateDayTask);
 
         return root;
+    }
+
+    private void updateToolbarTitle() {
+        ZoneId zoneId = ZoneId.of("Europe/Kiev");
+        ZonedDateTime kievTime = ZonedDateTime.now(zoneId);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM HH:mm");
+
+        String formattedDateTime = kievTime.format(formatter);
+
+        if (getActivity() != null && getActivity() instanceof AppCompatActivity) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Dashboard - " + formattedDateTime);
+        }
     }
 
     private void applyHighlightToCurrentDay(TabLayout tabLayout) {

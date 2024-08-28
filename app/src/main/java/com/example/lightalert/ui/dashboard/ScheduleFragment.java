@@ -188,13 +188,13 @@ public class ScheduleFragment extends Fragment {
             newMarginTop -= 60;
 
             ConstraintLayout.LayoutParams markerParams = (ConstraintLayout.LayoutParams) marker.getLayoutParams();
-            markerParams.leftMargin = 100;
+            markerParams.leftMargin = 20;
             markerParams.topMargin = newMarginTop - 10;
             marker.setLayoutParams(markerParams);
 
             ConstraintLayout.LayoutParams lineParams = (ConstraintLayout.LayoutParams) horizontalLine.getLayoutParams();
             lineParams.topMargin = newMarginTop;
-            lineParams.leftMargin = 200;
+            lineParams.leftMargin = 20;
             lineParams.width = 810;
             horizontalLine.setLayoutParams(lineParams);
         } else {
