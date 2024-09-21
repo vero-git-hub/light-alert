@@ -1,40 +1,68 @@
 package com.example.lightalert;
 
 import android.os.Bundle;
+import android.widget.TextView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.lightalert.adapters.ViewPagerAdapter;
+import com.example.lightalert.data.ScheduleDataLoader;
+import com.example.lightalert.fragments.DayFragment;
+import com.example.lightalert.data.Schedule;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import androidx.viewpager.widget.ViewPager;
 
-import com.example.lightalert.databinding.ActivityMainBinding;
+import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding;
+    private TextView currentDateTextView;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private Schedule schedule;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        currentDateTextView = findViewById(R.id.currentDate);
+        tabLayout = findViewById(R.id.tabLayout);
+        viewPager = findViewById(R.id.viewPager);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM", Locale.getDefault());
+        String currentDate = sdf.format(new Date());
+        currentDateTextView.setText(currentDate);
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.navView, navController);
+        ScheduleDataLoader dataLoader = new ScheduleDataLoader(this);
+        JSONObject jsonSchedule = dataLoader.loadScheduleData();
+        schedule = new Schedule(jsonSchedule);
+
+        setupViewPager();
     }
 
+    private void setupViewPager() {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        String[] days = getResources().getStringArray(R.array.days_of_week);
+
+        for (String day : days) {
+            DayFragment fragment = DayFragment.newInstance(day, schedule);
+            adapter.addFragment(fragment, day);
+        }
+
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
+
+        Calendar calendar = Calendar.getInstance();
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int index = (dayOfWeek + 5) % 7;
+        tabLayout.getTabAt(index).select();
+    }
 }
